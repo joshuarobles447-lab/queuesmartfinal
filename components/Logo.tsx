@@ -1,51 +1,31 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/colors';
+﻿import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
+import icon from '@/assets/images/icon.png';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
 }
 
 export default function Logo({ size = 'medium' }: LogoProps) {
-  const iconSize = size === 'large' ? 56 : size === 'small' ? 32 : 44;
-  const fontSize = size === 'large' ? 30 : size === 'small' ? 18 : 24;
-  const subSize = size === 'large' ? 30 : size === 'small' ? 18 : 24;
+  const logoSize = size === 'large' ? 80 : size === 'small' ? 40 : 60;
 
   return (
     <View style={styles.container}>
-      <View style={[styles.iconBox, { width: iconSize, height: iconSize, borderRadius: iconSize * 0.25 }]}>
-        <Text style={[styles.iconText, { fontSize: iconSize * 0.45 }]}>Q</Text>
-      </View>
-      <Text style={[styles.logoText, { fontSize: fontSize }]}>
-        <Text style={styles.smart}>Smart</Text>
-        <Text style={styles.queue}>Queue</Text>
-      </Text>
+      <Image
+        source={icon}
+        style={[styles.logo, { width: logoSize, height: logoSize }]}
+        resizeMode="contain"
+      />
     </View>
-  );
+ );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconBox: {
-    backgroundColor: Colors.teal,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconText: {
-    color: Colors.white,
-    fontWeight: '800',
-  },
-  logoText: {
-    fontWeight: '700',
-  },
-  smart: {
-    color: Colors.white,
-  },
-  queue: {
-    color: Colors.teal,
-  },
+ container: {
+ justifyContent: 'center',
+ alignItems: 'center',
+ },
+ logo: {
+ resizeMode: 'contain',
+ },
 });

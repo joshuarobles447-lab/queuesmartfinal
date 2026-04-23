@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp, useT } from '@/context/AppContext';
 import Logo from '@/components/Logo';
@@ -34,6 +35,14 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => router.replace('/')} activeOpacity={0.8}>
+              <ArrowLeft color={Colors.white} size={24} />
+            </TouchableOpacity>
+            <View />
+            <View style={{ width: 24 }} />
+          </View>
+
           <View style={styles.langRow}>
             <LanguagePicker />
           </View>
@@ -112,6 +121,13 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   scroll: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 8,
+    marginBottom: 8,
+  },
   langRow: { alignItems: 'flex-end', marginTop: 16, marginBottom: 8 },
   logoSection: { alignItems: 'center', marginVertical: 28 },
   title: {

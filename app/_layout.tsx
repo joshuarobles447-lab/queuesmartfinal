@@ -11,6 +11,10 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   useFrameworkReady();
 
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': Poppins_400Regular,
     'Poppins-SemiBold': Poppins_600SemiBold,

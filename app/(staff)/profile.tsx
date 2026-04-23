@@ -17,7 +17,7 @@ interface BusinessHours {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { appSettings } = useApp();
+  const { appSettings, setIsLoggedIn, setRole } = useApp();
   const t = useT();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -51,6 +51,12 @@ export default function ProfileScreen() {
   const handleToggleAccepting = () => {
     setAcceptingCustomers(!acceptingCustomers);
     setBusinessStatus(acceptingCustomers ? 'Closed' : 'Open');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setRole(null);
+    router.replace('/');
   };
 
   return (
@@ -181,6 +187,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity
               style={[styles.actionButton, styles.actionButtonDanger]}
+              onPress={handleLogout}
             >
               <Text style={[styles.actionButtonText, styles.actionButtonDangerText]}>
                 Logout

@@ -15,8 +15,8 @@ export default function LeaveConfirmScreen() {
   const { ticketNumber } = useApp();
 
   const handleLeave = () => {
-    // Handle leave queue action
-    router.push('/(customer)');
+    // Handle leave queue action and go back to start
+    router.replace('/');
   };
 
   return (
