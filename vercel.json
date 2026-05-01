@@ -11,7 +11,27 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "^/favicon\.ico$",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "^/_expo/(.*)$",
+      "dest": "/_expo/$1"
+    },
+    {
+      "src": "^/assets/(.*)$",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "^/manifest\.json$",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "^/sw\.js$",
+      "dest": "/sw.js"
+    },
+    {
+      "src": "^/(.*)$",
       "dest": "/index.html"
     }
   ]
