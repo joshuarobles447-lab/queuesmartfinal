@@ -83,7 +83,6 @@ export default function SignupScreen() {
       email: normalizedEmail,
       phone,
       role: 'customer',
-      accepted: true,
     });
 
     if (eventError) {

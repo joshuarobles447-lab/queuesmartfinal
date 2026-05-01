@@ -22,6 +22,16 @@ const statusLabels: Record<string, string> = {
   call: 'call',
 };
 
+const getOrdinalSuffix = (value: number) => {
+  const remainder10 = value % 10;
+  const remainder100 = value % 100;
+  if (remainder100 >= 11 && remainder100 <= 13) return 'th';
+  if (remainder10 === 1) return 'st';
+  if (remainder10 === 2) return 'nd';
+  if (remainder10 === 3) return 'rd';
+  return 'th';
+};
+
 export default function CustomerHomeScreen() {
   const router = useRouter();
   const t = useT();
@@ -39,7 +49,7 @@ export default function CustomerHomeScreen() {
           <Text style={styles.ticketNumber}>{ticketNumber}</Text>
           <View style={styles.ticketRow}>
             <View style={styles.ticketStat}>
-              <Text style={styles.statValue}>{queuePosition}{t('inLine') ? 'st' : ''}</Text>
+              <Text style={styles.statValue}>{queuePosition}{getOrdinalSuffix(queuePosition)}</Text>
               <Text style={styles.statLabel}>{t('inLine')}</Text>
             </View>
             <View style={styles.divider} />

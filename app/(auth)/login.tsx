@@ -45,6 +45,7 @@ export default function LoginScreen() {
     }
 
     const userId = data.user?.id;
+    const userEmail = data.user?.email;
     if (!userId) {
       Alert.alert('Login failed', 'Unable to get user session.');
       return;
@@ -56,23 +57,22 @@ export default function LoginScreen() {
       .eq('id', userId)
       .single();
 
-    if (profileError || !profile?.role) {
-      Alert.alert('Login failed', 'Account not recognized or not authorized. Please sign up first.');
+    if (profileError) {
+      console.log('Profile fetch error', profileError);
+      Alert.alert(
+        'Login failed',
+        `${profileError.message || 'No profile found.'}\nuserId=${userId}\nemail=${userEmail}`,
+      );
       return;
     }
 
-    const { data: signupEvent, error: signupError } = await supabase
-      .from('signup_events')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
-
-    if (signupError || !signupEvent) {
-      Alert.alert('Login failed', 'This account has not signed up through the system.');
+    const role = profile?.role?.toString().trim().toLowerCase();
+    if (!role) {
+      console.log('Profile exists but role is empty', profile);
+      Alert.alert('Login failed', `Account not recognized or not authorized. Please sign up first.\nuserId=${userId}\nemail=${userEmail}`);
       return;
     }
 
-    const role = profile.role;
     setIsLoggedIn(true);
     setRole(role);
 

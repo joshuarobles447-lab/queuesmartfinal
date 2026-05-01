@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, Clock, Edit2, Save } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp, useT } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
 
 interface BusinessHours {
   day: string;
@@ -53,10 +54,11 @@ export default function ProfileScreen() {
     setBusinessStatus(acceptingCustomers ? 'Closed' : 'Open');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
     setRole(null);
-    router.replace('/');
+    router.replace('/login?role=customer');
   };
 
   return (
@@ -128,7 +130,7 @@ export default function ProfileScreen() {
 
           {/* Analytics */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Today''s Analytics</Text>
+            <Text style={styles.cardTitle}>Today's Analytics</Text>
 
             <View style={styles.analyticsGrid}>
               <View style={styles.analyticsItem}>
