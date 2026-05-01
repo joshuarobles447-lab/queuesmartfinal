@@ -58,7 +58,7 @@ export default function ProfileScreen() {
     await supabase.auth.signOut();
     setIsLoggedIn(false);
     setRole(null);
-    router.replace('/login?role=staff');
+    await router.replace('/login');
   };
 
   return (

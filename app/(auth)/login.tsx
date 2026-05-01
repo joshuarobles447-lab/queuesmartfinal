@@ -44,8 +44,9 @@ export default function LoginScreen() {
       return;
     }
 
-    const userId = data.user?.id;
-    const userEmail = data.user?.email;
+    const authUser = data.user ?? data.session?.user;
+    const userId = authUser?.id;
+    const userEmail = authUser?.email ?? normalizedEmail;
     if (!userId) {
       Alert.alert('Login failed', 'Unable to get user session.');
       return;
@@ -57,19 +58,36 @@ export default function LoginScreen() {
       .eq('id', userId)
       .single();
 
-    if (profileError) {
+    let role = profile?.role?.toString().trim().toLowerCase();
+    if (!role && userEmail) {
+      const { data: profileByEmail, error: profileEmailError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('email', userEmail)
+        .single();
+
+      if (profileEmailError) {
+        console.log('Profile fetch by email error', profileEmailError);
+      }
+
+      role = profileByEmail?.role?.toString().trim().toLowerCase() || role;
+    }
+
+    if (profileError && !role) {
       console.log('Profile fetch error', profileError);
+    }
+
+    if (!role) {
+      console.log('Profile lookup failed', { userId, userEmail, profile, profileError });
       Alert.alert(
         'Login failed',
-        `${profileError.message || 'No profile found.'}\nuserId=${userId}\nemail=${userEmail}`,
+        `Account not recognized or not authorized. Please contact support if this is an existing account.\nuserId=${userId}\nemail=${userEmail}`,
       );
       return;
     }
 
-    const role = profile?.role?.toString().trim().toLowerCase();
-    if (!role) {
-      console.log('Profile exists but role is empty', profile);
-      Alert.alert('Login failed', `Account not recognized or not authorized. Please sign up first.\nuserId=${userId}\nemail=${userEmail}`);
+    if (role !== 'staff' && role !== 'customer') {
+      Alert.alert('Login failed', 'Your account role is not supported.');
       return;
     }
 
