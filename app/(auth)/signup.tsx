@@ -39,6 +39,11 @@ export default function SignupScreen() {
     const { data, error } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
     });
 
     if (error) {

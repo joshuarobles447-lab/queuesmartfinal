@@ -41,8 +41,7 @@ export default function CustomerHomeScreen() {
   
   const [ticketNumber, setTicketNumber] = useState<string>('None');
   const [queuePosition, setQueuePosition] = useState<number>(0);
-  const [queueList, setQueueList] = useState(defaultQueueList);
-
+const [queueList, setQueueList] = useState<{ ticket: string; status: string }[]>(defaultQueueList);
   useEffect(() => {
     const fetchMyQueue = async () => {
       const { data: sessionData } = await supabase.auth.getSession();

@@ -33,18 +33,20 @@ export default function QRScanScreen() {
   }, []);
 
   const saveTicket = async (ticketValue: string) => {
-    let queueCode = ticketValue;
+    let queueCode = ticketValue.trim().toUpperCase();
     if (ticketValue.startsWith('SMARTQUEUE:JOIN:')) {
       queueCode = ticketValue.split(':')[2];
     } else if (ticketValue.startsWith('SMARTQUEUE:JOIN')) {
       queueCode = 'SQ-DEFAULT';
     }
-    
+
     // Generate the customer's ticket number
     const generatedTicket = `A-${Math.floor(100 + Math.random() * 900)}`;
 
+    // IMPORTANT: Always call getSession fresh inside the function
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    const userId = sessionData?.session?.user?.id;
+    const user = sessionData?.session?.user;
+    const userId = user?.id;
 
     if (sessionError || !userId) {
       setIsSaving(false);
@@ -53,13 +55,23 @@ export default function QRScanScreen() {
     }
 
     // Fetch the user's name from profiles
-    const { data: profileData } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('full_name')
       .eq('id', userId)
       .single();
 
-    const customerName = profileData?.full_name || 'Unknown User';
+    if (profileError) {
+      console.warn('Profile fetch error:', profileError.message);
+    }
+
+    // Try profile first, then auth user_metadata, then email prefix, then fallback
+    const fallbackName = user?.email ? user.email.split('@')[0] : 'Student';
+    const customerName =
+      profileData?.full_name?.trim() ||
+      user?.user_metadata?.full_name?.trim() ||
+      user?.user_metadata?.name?.trim() ||
+      fallbackName;
 
     const { error } = await supabase.from('queue_entries').insert({
       user_id: userId,
@@ -72,6 +84,8 @@ export default function QRScanScreen() {
     setIsSaving(false);
 
     if (error) {
+      setScanned(false);
+      setIsSaving(false);
       Alert.alert('Error', 'Unable to save ticket: ' + error.message);
       return;
     }
@@ -145,17 +159,17 @@ export default function QRScanScreen() {
         </CameraView>
 
         <Text style={styles.scanText}>
-          {scanned ? `Scanned: ${scanResult ?? 'unknown'}` : 'Point the camera at a QR code'}
+          {isSaving ? 'Processing scan...' : scanned ? `Scanned: ${scanResult ?? 'unknown'}` : 'Point the camera at a QR code'}
         </Text>
 
         {!scanned && (
           <View style={styles.manualEntryContainer}>
-            <Text style={styles.manualLabel}>{t('enterCodeManually')}</Text>
+            <Text style={styles.manualLabel}>Enter the short code (e.g. SQ-4829)</Text>
             <TextInput
               style={styles.manualInput}
               value={manualCode}
               onChangeText={setManualCode}
-              placeholder="SMARTQUEUE:A-123"
+              placeholder="SQ-4829"
               placeholderTextColor={Colors.gray}
               autoCapitalize="characters"
               autoCorrect={false}
