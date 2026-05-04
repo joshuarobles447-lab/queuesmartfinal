@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView,
@@ -8,13 +8,24 @@ import { ArrowLeft, AlertCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp, useT } from '@/context/AppContext';
 import Logo from '@/components/Logo';
-
+import { supabase } from '@/lib/supabase';
 export default function LeaveConfirmScreen() {
   const router = useRouter();
   const t = useT();
   const { ticketNumber } = useApp();
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+
+    if (userId) {
+      await supabase
+        .from('queue_entries')
+        .delete()
+        .eq('user_id', userId)
+        .eq('status', 'waiting');
+    }
+
     // Handle leave queue action and go back to start
     router.replace('/');
   };

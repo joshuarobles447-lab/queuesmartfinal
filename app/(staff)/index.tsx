@@ -1,12 +1,14 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, FlatList, Alert,
+  SafeAreaView, ScrollView, FlatList, Alert, Modal
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bell, Settings, Phone, SkipForward, RotateCcw, X, Pause } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp, useT } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
+import QRCode from 'react-native-qrcode-svg';
 
 interface Customer {
   id: string;
@@ -14,6 +16,7 @@ interface Customer {
   ticketNumber: string;
   waitTime: number;
   status: 'waiting' | 'called' | 'no-show';
+  created_at?: string;
 }
 
 export default function StaffPanelScreen() {
@@ -23,21 +26,58 @@ export default function StaffPanelScreen() {
 
   const [acceptingCustomers, setAcceptingCustomers] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
-  const [currentCustomer] = useState<Customer | null>({
-    id: '1',
-    name: 'John Doe',
-    ticketNumber: 'A-001',
-    waitTime: 5,
-    status: 'called',
-  });
+  const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
 
-  const [queueList, setQueueList] = useState<Customer[]>([
-    { id: '2', name: 'Jane Smith', ticketNumber: 'A-002', waitTime: 12, status: 'waiting' },
-    { id: '3', name: 'Mike Johnson', ticketNumber: 'A-003', waitTime: 18, status: 'waiting' },
-    { id: '4', name: 'Sarah Williams', ticketNumber: 'A-004', waitTime: 25, status: 'waiting' },
-    { id: '5', name: 'Tom Brown', ticketNumber: 'A-005', waitTime: 31, status: 'waiting' },
-  ]);
+  const [queueList, setQueueList] = useState<Customer[]>([]);
+
+  useEffect(() => {
+    const fetchQueue = async () => {
+      const { data, error } = await supabase
+        .from('queue_entries')
+        .select('*')
+        .eq('status', 'waiting')
+        .order('created_at', { ascending: true });
+
+      if (data) {
+        const mappedQueue = data.map((entry: any) => ({
+          id: entry.id.toString(),
+          name: entry.customer_name || 'Unknown User',
+          ticketNumber: entry.ticket,
+          waitTime: Math.floor((new Date().getTime() - new Date(entry.created_at).getTime()) / 60000),
+          status: entry.status,
+          created_at: entry.created_at,
+        }));
+        setQueueList(mappedQueue);
+      }
+    };
+
+    fetchQueue();
+
+    const channel = supabase
+      .channel('public:queue_entries')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_entries' },
+        () => {
+          fetchQueue();
+        }
+      )
+      .subscribe();
+
+    const interval = setInterval(() => {
+      setQueueList(prev => prev.map(item => ({
+        ...item,
+        waitTime: item.created_at ? Math.floor((new Date().getTime() - new Date(item.created_at).getTime()) / 60000) : item.waitTime
+      })));
+    }, 60000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleCallNext = () => {
     if (queueList.length > 0) {
@@ -220,6 +260,13 @@ export default function StaffPanelScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.actionBtnLarge, { backgroundColor: Colors.cardDark, marginTop: 12 }]}
+            onPress={() => setShowQR(true)}
+          >
+            <Text style={[styles.actionBtnText, { color: Colors.teal }]}>Show Shop QR Code</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Queue List */}
@@ -240,6 +287,21 @@ export default function StaffPanelScreen() {
           )}
         </View>
       </ScrollView>
+
+      <Modal visible={showQR} animationType="fade" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Scan to Join Queue</Text>
+            <View style={styles.qrContainer}>
+              <QRCode value="SMARTQUEUE:JOIN" size={200} color={Colors.teal} backgroundColor={Colors.card} />
+            </View>
+            <Text style={styles.modalSubtitle}>Customers can scan this code to enter the queue</Text>
+            <TouchableOpacity style={styles.closeModalBtn} onPress={() => setShowQR(false)}>
+              <Text style={styles.closeModalBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -489,6 +551,56 @@ const styles = StyleSheet.create({
   emptyQueueText: {
     fontSize: 14,
     color: Colors.textSecondary,
+    fontFamily: 'Poppins',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.white,
+    fontFamily: 'Poppins',
+    marginBottom: 24,
+  },
+  qrContainer: {
+    padding: 16,
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontFamily: 'Poppins',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  closeModalBtn: {
+    backgroundColor: Colors.teal,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeModalBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.white,
     fontFamily: 'Poppins',
   },
 });

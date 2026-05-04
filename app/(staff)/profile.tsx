@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, Switch, Alert,
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
 
           {/* Analytics */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Today's Analytics</Text>
+            <Text style={styles.cardTitle}>Today&apos;s Analytics</Text>
 
             <View style={styles.analyticsGrid}>
               <View style={styles.analyticsItem}>

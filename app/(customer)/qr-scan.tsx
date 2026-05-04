@@ -33,7 +33,12 @@ export default function QRScanScreen() {
   }, []);
 
   const saveTicket = async (ticketValue: string) => {
-    const ticket = ticketValue.startsWith('SMARTQUEUE:') ? ticketValue.split(':')[1] : ticketValue;
+    let ticket = ticketValue.startsWith('SMARTQUEUE:') ? ticketValue.split(':')[1] : ticketValue;
+    
+    if (ticket === 'JOIN') {
+      ticket = `A-${Math.floor(100 + Math.random() * 900)}`;
+    }
+
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     const userId = sessionData?.session?.user?.id;
 
@@ -43,8 +48,18 @@ export default function QRScanScreen() {
       return;
     }
 
+    // Fetch the user's name from profiles
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userId)
+      .single();
+
+    const customerName = profileData?.full_name || 'Unknown User';
+
     const { error } = await supabase.from('queue_entries').insert({
       user_id: userId,
+      customer_name: customerName,
       ticket,
       status: 'waiting',
     });
