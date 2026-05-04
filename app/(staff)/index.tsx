@@ -27,12 +27,30 @@ export default function StaffPanelScreen() {
   const [acceptingCustomers, setAcceptingCustomers] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [queueCode, setQueueCode] = useState('');
 
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
 
   const [queueList, setQueueList] = useState<Customer[]>([]);
 
   useEffect(() => {
+    // Generate a random queue code for this session
+    const generatedCode = 'SQ-' + Math.floor(1000 + Math.random() * 9000);
+    setQueueCode(generatedCode);
+
+    const registerQueue = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+      if (userId) {
+        // Upsert into queues table for the two-table approach
+        await supabase.from('queues').upsert({
+          staff_id: userId,
+          queue_code: generatedCode,
+        });
+      }
+    };
+    registerQueue();
+
     const fetchQueue = async () => {
       const { data, error } = await supabase
         .from('queue_entries')
@@ -293,9 +311,13 @@ export default function StaffPanelScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Scan to Join Queue</Text>
             <View style={styles.qrContainer}>
-              <QRCode value="SMARTQUEUE:JOIN" size={200} color={Colors.teal} backgroundColor={Colors.card} />
+              <QRCode value={`SMARTQUEUE:JOIN:${queueCode}`} size={200} color={Colors.teal} backgroundColor={Colors.card} />
             </View>
-            <Text style={styles.modalSubtitle}>Customers can scan this code to enter the queue</Text>
+            <View style={styles.codeContainer}>
+              <Text style={styles.codeLabel}>Manual Entry Code</Text>
+              <Text style={styles.codeValue}>{queueCode}</Text>
+            </View>
+            <Text style={styles.modalSubtitle}>Customers can scan this code or type the short code to enter the queue</Text>
             <TouchableOpacity style={styles.closeModalBtn} onPress={() => setShowQR(false)}>
               <Text style={styles.closeModalBtnText}>Close</Text>
             </TouchableOpacity>
@@ -580,7 +602,31 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: Colors.card,
     borderRadius: 16,
+    marginBottom: 16,
+  },
+  codeContainer: {
+    backgroundColor: Colors.cardDark,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  codeLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontFamily: 'Poppins',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  codeValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.teal,
+    fontFamily: 'Poppins',
+    letterSpacing: 2,
   },
   modalSubtitle: {
     fontSize: 14,

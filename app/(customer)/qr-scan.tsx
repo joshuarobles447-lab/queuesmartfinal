@@ -33,11 +33,15 @@ export default function QRScanScreen() {
   }, []);
 
   const saveTicket = async (ticketValue: string) => {
-    let ticket = ticketValue.startsWith('SMARTQUEUE:') ? ticketValue.split(':')[1] : ticketValue;
-    
-    if (ticket === 'JOIN') {
-      ticket = `A-${Math.floor(100 + Math.random() * 900)}`;
+    let queueCode = ticketValue;
+    if (ticketValue.startsWith('SMARTQUEUE:JOIN:')) {
+      queueCode = ticketValue.split(':')[2];
+    } else if (ticketValue.startsWith('SMARTQUEUE:JOIN')) {
+      queueCode = 'SQ-DEFAULT';
     }
+    
+    // Generate the customer's ticket number
+    const generatedTicket = `A-${Math.floor(100 + Math.random() * 900)}`;
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     const userId = sessionData?.session?.user?.id;
@@ -60,7 +64,8 @@ export default function QRScanScreen() {
     const { error } = await supabase.from('queue_entries').insert({
       user_id: userId,
       customer_name: customerName,
-      ticket,
+      queue_code: queueCode,
+      ticket: generatedTicket,
       status: 'waiting',
     });
 
@@ -71,8 +76,8 @@ export default function QRScanScreen() {
       return;
     }
 
-    setScanResult(ticket);
-    Alert.alert('Success', `Ticket saved: ${ticket}`, [
+    setScanResult(generatedTicket);
+    Alert.alert('Success', `Ticket saved: ${generatedTicket}`, [
       {
         text: 'OK',
         onPress: () => router.replace('/(customer)'),

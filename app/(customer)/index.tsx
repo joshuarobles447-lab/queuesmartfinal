@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView,
@@ -8,6 +8,7 @@ import { Hop as Home, Bell, User } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp, useT } from '@/context/AppContext';
 import Logo from '@/components/Logo';
+import { supabase } from '@/lib/supabase';
 
 const statusColors: Record<string, string> = {
   serving: Colors.serving,
@@ -23,6 +24,7 @@ const statusLabels: Record<string, string> = {
 };
 
 const getOrdinalSuffix = (value: number) => {
+  if (value === 0) return '';
   const remainder10 = value % 10;
   const remainder100 = value % 100;
   if (remainder100 >= 11 && remainder100 <= 13) return 'th';
@@ -35,7 +37,74 @@ const getOrdinalSuffix = (value: number) => {
 export default function CustomerHomeScreen() {
   const router = useRouter();
   const t = useT();
-  const { ticketNumber, queuePosition, queueList } = useApp();
+  const { queueList: defaultQueueList } = useApp();
+  
+  const [ticketNumber, setTicketNumber] = useState<string>('None');
+  const [queuePosition, setQueuePosition] = useState<number>(0);
+  const [queueList, setQueueList] = useState(defaultQueueList);
+
+  useEffect(() => {
+    const fetchMyQueue = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+      if (!userId) return;
+
+      const { data: myEntries } = await supabase
+        .from('queue_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .in('status', ['waiting', 'called'])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (myEntries && myEntries.length > 0) {
+        const myEntry = myEntries[0];
+        setTicketNumber(myEntry.ticket);
+
+        // Fetch everyone in the same queue
+        if (myEntry.queue_code) {
+          const { data: allEntries } = await supabase
+            .from('queue_entries')
+            .select('*')
+            .eq('queue_code', myEntry.queue_code)
+            .eq('status', 'waiting')
+            .order('created_at', { ascending: true });
+
+          if (allEntries) {
+            const pos = allEntries.findIndex((e: any) => e.id === myEntry.id) + 1;
+            setQueuePosition(pos > 0 ? pos : 0);
+            
+            // Map queueList for display
+            const mappedList = allEntries.slice(0, 5).map((e: any, index: number) => ({
+              ticket: e.ticket,
+              status: index === 0 ? 'serving' : index === 1 ? 'next' : 'standby'
+            }));
+            setQueueList(mappedList);
+          }
+        }
+      } else {
+        setTicketNumber('None');
+        setQueuePosition(0);
+      }
+    };
+
+    fetchMyQueue();
+
+    const channel = supabase
+      .channel('public:queue_entries')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_entries' },
+        () => {
+          fetchMyQueue();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
