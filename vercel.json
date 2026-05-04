@@ -3,6 +3,16 @@
   "outputDirectory": "dist",
   "framework": null,
   "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
