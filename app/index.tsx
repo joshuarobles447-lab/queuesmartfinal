@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { User, UserCog } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
@@ -12,52 +12,11 @@ export default function ChooseScreen() {
   const router = useRouter();
   const { setRole } = useApp();
   const t = useT();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const restoreSession = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData?.session?.user;
-
-      if (user) {
-        // Fetch the user's role from profiles
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        const role = profile?.role || 'customer';
-        setRole(role as 'staff' | 'customer');
-
-        if (role === 'staff') {
-          router.replace('/(staff)');
-        } else {
-          router.replace('/(customer)');
-        }
-        return;
-      }
-
-      setChecking(false);
-    };
-
-    restoreSession();
-  }, []);
 
   const handleChoose = (role: 'staff' | 'customer') => {
     setRole(role);
     router.push(`/(auth)/login?role=${role}`);
   };
-
-  if (checking) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.teal} />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.safe}>
