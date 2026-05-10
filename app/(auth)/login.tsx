@@ -152,31 +152,12 @@ export default function LoginScreen() {
               <Text style={styles.loginBtnText}>{t('logIn')}</Text>
             </TouchableOpacity>
 
-            {paramRole !== 'staff' && (
-              <>
-                <View style={styles.dividerRow}>
-                  <View style={styles.divider} />
-                  <Text style={styles.dividerText}>{t('orContinueWith')}</Text>
-                  <View style={styles.divider} />
-                </View>
-
-                <View style={styles.socialRow}>
-                  <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
-                    <Text style={styles.socialText}>G  {t('google')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.socialBtn, styles.fbBtn]} activeOpacity={0.8}>
-                    <Text style={styles.socialText}>f  {t('facebook')}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.signupRow}>
-                  <Text style={styles.noAccount}>{t('noAccount')} </Text>
-                  <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-                    <Text style={styles.signupLink}>{t('signUp')}</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+            <View style={styles.signupRow}>
+              <Text style={styles.noAccount}>{t('noAccount')} </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+                <Text style={styles.signupLink}>{t('signUp')}</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.forgotRow}>
               <Text style={styles.forgotText}>{t('forgotPassword')}</Text>

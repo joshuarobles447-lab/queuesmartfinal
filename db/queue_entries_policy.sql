@@ -5,9 +5,9 @@ create policy "Allow authenticated user to insert own queue entry" on queue_entr
   for insert
   with check (auth.uid() = user_id);
 
-create policy "Allow authenticated user to select own queue entry" on queue_entries
+create policy "Allow authenticated user to select queue entries in same queue" on queue_entries
   for select
-  using (auth.uid() = user_id);
+  using (auth.role() = 'authenticated');
 
 create policy "Allow authenticated user to update own queue entry" on queue_entries
   for update

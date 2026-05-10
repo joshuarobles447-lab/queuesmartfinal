@@ -41,6 +41,7 @@ export default function CustomerHomeScreen() {
   
   const [ticketNumber, setTicketNumber] = useState<string>('None');
   const [queuePosition, setQueuePosition] = useState<number>(0);
+  const [queueCode, setQueueCode] = useState<string>('None');
 const [queueList, setQueueList] = useState<{ ticket: string; status: string }[]>(defaultQueueList);
   useEffect(() => {
     const fetchMyQueue = async () => {
@@ -59,6 +60,7 @@ const [queueList, setQueueList] = useState<{ ticket: string; status: string }[]>
       if (myEntries && myEntries.length > 0) {
         const myEntry = myEntries[0];
         setTicketNumber(myEntry.ticket);
+        setQueueCode(myEntry.queue_code || 'None');
 
         // Fetch everyone in the same queue
         if (myEntry.queue_code) {
@@ -84,6 +86,7 @@ const [queueList, setQueueList] = useState<{ ticket: string; status: string }[]>
       } else {
         setTicketNumber('None');
         setQueuePosition(0);
+        setQueueCode('None');
       }
     };
 
@@ -115,6 +118,7 @@ const [queueList, setQueueList] = useState<{ ticket: string; status: string }[]>
         <View style={styles.ticketCard}>
           <Text style={styles.ticketLabel}>{t('yourControlNumber')}</Text>
           <Text style={styles.ticketNumber}>{ticketNumber}</Text>
+          <Text style={styles.queueCode}>Queue: {queueCode}</Text>
           <View style={styles.ticketRow}>
             <View style={styles.ticketStat}>
               <Text style={styles.statValue}>{queuePosition}{getOrdinalSuffix(queuePosition)}</Text>
@@ -203,6 +207,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     letterSpacing: 2,
     lineHeight: 60,
+  },
+  queueCode: {
+    color: Colors.white,
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    marginTop: 8,
   },
   ticketRow: {
     flexDirection: 'row',
