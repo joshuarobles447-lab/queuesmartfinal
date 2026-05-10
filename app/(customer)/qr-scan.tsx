@@ -40,6 +40,8 @@ export default function QRScanScreen() {
       queueCode = 'SQ-DEFAULT';
     }
 
+    setScanResult(queueCode);
+
     // Generate the customer's ticket number
     const generatedTicket = `A-${Math.floor(100 + Math.random() * 900)}`;
 
@@ -90,13 +92,8 @@ export default function QRScanScreen() {
       return;
     }
 
-    setScanResult(generatedTicket);
-    Alert.alert('Success', `Ticket saved: ${generatedTicket}`, [
-      {
-        text: 'OK',
-        onPress: () => router.replace('/(customer)'),
-      },
-    ]);
+    setScanResult(queueCode);
+    router.replace('/(customer)');
   };
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
