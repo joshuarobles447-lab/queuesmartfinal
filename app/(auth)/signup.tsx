@@ -237,9 +237,8 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: Colors.inputBg,
+    paddingHorizontal: 8,
+    backgroundColor: 'transparent',
   },
   showText: { color: Colors.teal, fontSize: 13, fontFamily: 'Poppins-SemiBold' },
   checkRow: {
