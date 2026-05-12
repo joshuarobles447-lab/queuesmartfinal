@@ -164,10 +164,6 @@ export default function ProfileScreen() {
           >
             <Text style={styles.actionButtonText}>{t('notificationSettings')}</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
-            <Text style={styles.actionButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

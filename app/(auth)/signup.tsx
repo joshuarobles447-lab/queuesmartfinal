@@ -144,9 +144,9 @@ export default function SignupScreen() {
             <Text style={styles.hint}>{t('phoneHint')}</Text>
 
             <Text style={[styles.label, { marginTop: 12 }]}>{t('password')}</Text>
-            <View style={styles.passwordRow}>
+            <View style={styles.passwordContainer}>
               <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                style={[styles.input, styles.passwordInput]}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPass}
@@ -224,17 +224,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     marginBottom: 4,
   },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  passwordContainer: {
+    position: 'relative',
     marginBottom: 4,
   },
+  passwordInput: {
+    paddingRight: 78,
+  },
   showBtn: {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: Colors.inputBg,
     borderRadius: 8,
+    backgroundColor: Colors.inputBg,
   },
   showText: { color: Colors.teal, fontSize: 13, fontFamily: 'Poppins-SemiBold' },
   checkRow: {
