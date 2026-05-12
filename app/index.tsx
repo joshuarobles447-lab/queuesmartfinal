@@ -26,7 +26,7 @@ export default function ChooseScreen() {
         </View>
 
         <View style={styles.logoSection}>
-          <Logo size="large" />
+          <Logo size="large" showText />
         </View>
 
         <Text style={styles.chooseText}>{t('chooseRole')}</Text>

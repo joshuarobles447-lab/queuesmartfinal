@@ -23,7 +23,6 @@ export default function QRScanScreen() {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [manualCode, setManualCode] = useState('');
-  const [showManualEntry, setShowManualEntry] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,11 +34,12 @@ export default function QRScanScreen() {
   const saveTicket = async (ticketValue: string) => {
     let queueCode = ticketValue.trim().toUpperCase();
     if (ticketValue.startsWith('SMARTQUEUE:JOIN:')) {
-      queueCode = ticketValue.split(':')[2];
+      queueCode = ticketValue.split(':')[2]?.trim().toUpperCase() || queueCode;
     } else if (ticketValue.startsWith('SMARTQUEUE:JOIN')) {
       queueCode = 'SQ-DEFAULT';
     }
 
+    // Display the parsed queue code immediately
     setScanResult(queueCode);
 
     // Generate the customer's ticket number
@@ -156,7 +156,11 @@ export default function QRScanScreen() {
         </CameraView>
 
         <Text style={styles.scanText}>
-          {isSaving ? 'Processing scan...' : scanned ? `Scanned: ${scanResult ?? 'unknown'}` : 'Point the camera at a QR code'}
+          {isSaving
+            ? 'Processing scan...'
+            : scanned
+            ? `Code entered: ${scanResult ?? 'unknown'}`
+            : 'Point the camera at a QR code'}
         </Text>
 
         {!scanned && (

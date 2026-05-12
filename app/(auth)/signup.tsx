@@ -108,7 +108,7 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.logoSection}>
-            <Logo size="medium" />
+            <Logo size="medium" showText />
           </View>
 
           <Text style={styles.title}>{t('createAccount')}</Text>
