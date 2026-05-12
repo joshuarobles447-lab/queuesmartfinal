@@ -96,7 +96,7 @@ export default function SignupScreen() {
 
     setIsLoggedIn(true);
     setRole('customer');
-    router.replace('/(customer)/qr-scan');
+    router.replace('/(customer)');
   };
 
   return (
