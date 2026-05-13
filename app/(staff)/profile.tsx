@@ -183,7 +183,10 @@ export default function ProfileScreen() {
 
           {/* Account Actions */}
           <View style={styles.card}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push('/(staff)/change-password')}
+            >
               <Text style={styles.actionButtonText}>Change Password</Text>
             </TouchableOpacity>
 

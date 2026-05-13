@@ -29,6 +29,12 @@ export default function StaffLayout() {
           title: 'Profile',
         }}
       />
+      <Stack.Screen
+        name="change-password"
+        options={{
+          title: 'Change Password',
+        }}
+      />
     </Stack>
   );
 }
