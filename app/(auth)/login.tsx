@@ -158,6 +158,10 @@ export default function LoginScreen() {
                 <Text style={styles.signupLink}>{t('signUp')}</Text>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity style={styles.forgotRow} onPress={() => router.push('/(auth)/forgot-password')}>
+              <Text style={styles.forgotText}>{t('forgotPassword')}</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -218,6 +222,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   showText: { color: Colors.teal, fontSize: 13, fontFamily: 'Poppins-SemiBold' },
+  forgotRow: { alignItems: 'center', marginTop: 16 },
+  forgotText: { color: Colors.teal, fontSize: 13, fontFamily: 'Poppins-SemiBold' },
   loginBtn: {
     backgroundColor: Colors.teal,
     borderRadius: 8,
